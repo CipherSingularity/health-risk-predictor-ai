@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chronic Disease Risk Assessment</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <div class="container">
+    <h1>Chronic Disease Risk Assessment</h1>
+    
+    <form id="healthForm">
+      <div class="grid">
+        <!-- Row 1 -->
+        <input type="number" placeholder="Age" name="age" min="18" max="100" required />
+        <select name="gender" required>
+          <option value="" disabled selected>Gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+        <input type="number" placeholder="Glucose (mg/dL)" name="glucose" min="50" max="400" required />
+
+        <!-- Row 2 -->
+        <input type="number" step="0.1" placeholder="HbA1c (%)" name="hba1c" min="3" max="15" required />
+        <input type="number" placeholder="Systolic BP" name="systolic" min="70" max="250" required />
+        <input type="number" placeholder="Diastolic BP" name="diastolic" min="40" max="150" required />
+
+        <!-- Row 3 -->
+        <input type="number" step="0.1" placeholder="BMI" name="bmi" min="10" max="60" required />
+        <input type="number" placeholder="Cholesterol" name="cholesterol" min="100" max="400" required />
+        <input type="number" placeholder="Triglycerides" name="triglycerides" min="30" max="1000" required />
+
+        <!-- Row 4 -->
+        <select name="smoking" required>
+          <option value="" disabled selected>Smoking</option>
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
+
+        <select name="alcohol" required>
+          <option value="" disabled selected>Alcohol Use</option>
+          <option value="no">No</option>
+          <option value="occasional">Occasional</option>
+          <option value="regular">Regular</option>
+        </select>
+
+        <select name="activity" required>
+          <option value="" disabled selected>Physical Activity</option>
+          <option value="low">Low</option>
+          <option value="moderate">Moderate</option>
+          <option value="high">High</option>
+        </select>
+
+        <!-- Row 5 -->
+        <input type="number" placeholder="Diet Score (0-100)" name="diet_score" min="0" max="100" required />
+
+        <select name="family_history" required>
+          <option value="" disabled selected>Family History</option>
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
+
+        <input type="number" step="0.5" placeholder="Sleep (hours)" name="sleep" min="0" max="24" required />
+
+        <!-- Row 6 -->
+        <select name="stress" required>
+          <option value="" disabled selected>Stress Level</option>
+          <option value="low">Low</option>
+          <option value="moderate">Moderate</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+
+      <button type="submit">Predict Risk</button>
+    </form>
+
+    <!-- Results Section -->
+    <div id="results" class="hidden">
+      <h2>Your Risk Profile</h2>
+      <div id="risks"></div>
+      <h3>Personalized Recommendations</h3>
+      <ul id="recs"></ul>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
