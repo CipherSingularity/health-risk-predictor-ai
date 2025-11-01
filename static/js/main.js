@@ -15,8 +15,15 @@ document.getElementById('healthForm').addEventListener('submit', async (e) => {
       body: JSON.stringify(data)
     });
 
-    if (!response.ok) throw new Error('Prediction request failed');
     const result = await response.json();
+    // Log entire server payload for debugging and show server error if present
+    console.log('Server response:', result, 'HTTP ok:', response.ok);
+    if (!response.ok || result.error) {
+      const errMsg = result.error || 'Prediction request failed';
+      document.getElementById('risks').innerHTML = `<p style="color:crimson">Error: ${errMsg}</p><pre>${result.traceback || ''}</pre>`;
+      document.getElementById('recs').innerHTML = '';
+      return;
+    }
     displayResults(result);
   } catch (err) {
     document.getElementById('risks').innerHTML = `<p style="color:crimson">Error: ${err.message}</p>`;
@@ -37,7 +44,7 @@ function displayResults(payload) {
   const tsEl = document.getElementById('result-timestamp');
   if (tsEl) tsEl.textContent = ts;
 
-  // Build risk rows
+  // Build risk rows (coerce, clamp and format values)
   const makeRow = (label, value, cls) => `
     <div class="risk-row">
       <div class="risk-label">${label}</div>
@@ -49,9 +56,16 @@ function displayResults(payload) {
 
   risksDiv.innerHTML = '';
   if (risks) {
-    risksDiv.innerHTML += makeRow('Diabetes', Number(risks.diabetes || risks.Diabetes_Risk || 0).toFixed(1), 'diabetes');
-    risksDiv.innerHTML += makeRow('Heart Disease', Number(risks.heart_disease || risks.Heart_Disease || 0).toFixed(1), 'heart');
-    risksDiv.innerHTML += makeRow('Stroke', Number(risks.stroke || risks.Stroke || 0).toFixed(1), 'stroke');
+    const d = parseFloat(risks.diabetes ?? risks.Diabetes_Risk ?? 0) || 0;
+    const h = parseFloat(risks.heart_disease ?? risks.Heart_Disease ?? 0) || 0;
+    const s = parseFloat(risks.stroke ?? risks.Stroke ?? 0) || 0;
+    // clamp to 0-100
+    const D = Math.max(0, Math.min(100, d));
+    const H = Math.max(0, Math.min(100, h));
+    const S = Math.max(0, Math.min(100, s));
+    risksDiv.innerHTML += makeRow('Diabetes', D.toFixed(1), 'diabetes');
+    risksDiv.innerHTML += makeRow('Heart Disease', H.toFixed(1), 'heart');
+    risksDiv.innerHTML += makeRow('Stroke', S.toFixed(1), 'stroke');
   } else {
     risksDiv.innerHTML = '<p>No risk data returned.</p>';
   }
