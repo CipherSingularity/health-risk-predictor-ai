@@ -14,6 +14,7 @@ def index():
 def predict():
     try:
         data = request.json
+        app.logger.info('Incoming /predict JSON: %s', data)
 
         # Map form data
         input_data = {
@@ -38,6 +39,7 @@ def predict():
 
         risks = predict_risk(input_data)
         recs = get_recommendations(risks, input_data)
+        app.logger.info('Predicted risks: %s, recommendations: %s', risks, recs)
 
         return jsonify({
             'risks': risks,
