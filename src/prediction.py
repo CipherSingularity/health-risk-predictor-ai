@@ -152,14 +152,25 @@ def predict_risk(input_dict):
 
             # DEBUG: print alignment and category info to help trace empty prediction cases
             try:
-                print('\n--- prediction debug: df_aligned ---')
-                print('columns:', list(df_aligned.columns))
-                print('row0:', df_aligned.iloc[0].to_dict())
-                print('cat_cols:', cat_cols)
+                # Use Flask's logger if available; fall back to print
+                import logging
+                logger = logging.getLogger('app')
+                logger.info('--- prediction debug: df_aligned ---')
+                logger.info('columns: %s', list(df_aligned.columns))
+                logger.info('row0: %s', df_aligned.iloc[0].to_dict())
+                logger.info('cat_cols: %s', cat_cols)
                 if 'enc' in locals():
-                    print('encoder categories:', [[str(x) for x in cats] for cats in enc.categories_])
+                    logger.info('encoder categories: %s', [[str(x) for x in cats] for cats in enc.categories_])
             except Exception:
-                pass
+                try:
+                    print('\n--- prediction debug: df_aligned ---')
+                    print('columns:', list(df_aligned.columns))
+                    print('row0:', df_aligned.iloc[0].to_dict())
+                    print('cat_cols:', cat_cols)
+                    if 'enc' in locals():
+                        print('encoder categories:', [[str(x) for x in cats] for cats in enc.categories_])
+                except Exception:
+                    pass
 
             # Manually assemble transformed matrix to avoid OneHotEncoder transform bug
             # 1) numeric transformer
@@ -189,10 +200,16 @@ def predict_risk(input_dict):
                         cat_arrays.append(arr)
                 # DEBUG: report categorical matrix stats
                 try:
+                    import logging
+                    logger = logging.getLogger('app')
                     if cat_arrays:
-                        print('cat_arrays count:', len(cat_arrays), 'first col sample:', cat_arrays[0].ravel()[:5])
+                        logger.info('cat_arrays count: %s first col sample: %s', len(cat_arrays), getattr(cat_arrays[0], 'ravel', lambda: cat_arrays[0])()[:5])
                 except Exception:
-                    pass
+                    try:
+                        if cat_arrays:
+                            print('cat_arrays count:', len(cat_arrays), 'first col sample:', cat_arrays[0].ravel()[:5])
+                    except Exception:
+                        pass
                 if cat_arrays:
                     cat_matrix = np.hstack(cat_arrays)
                 else:
