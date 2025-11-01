@@ -13,8 +13,6 @@
 
 **An intelligent health assessment platform that predicts chronic disease risks and provides personalized preventive recommendations using machine learning.**
 
-[🚀 Demo](#demo) • [📋 Features](#features) • [🛠️ Installation](#installation) • [📊 Dataset](#dataset) • [🤖 Models](#models) • [📸 Screenshots](#screenshots)
-
 </div>
 
 ---
