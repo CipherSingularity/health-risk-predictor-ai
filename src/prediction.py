@@ -150,6 +150,17 @@ def predict_risk(input_dict):
                 else:
                     df_aligned[c] = pd.to_numeric(df_aligned[c], errors='coerce').fillna(0)
 
+            # DEBUG: print alignment and category info to help trace empty prediction cases
+            try:
+                print('\n--- prediction debug: df_aligned ---')
+                print('columns:', list(df_aligned.columns))
+                print('row0:', df_aligned.iloc[0].to_dict())
+                print('cat_cols:', cat_cols)
+                if 'enc' in locals():
+                    print('encoder categories:', [[str(x) for x in cats] for cats in enc.categories_])
+            except Exception:
+                pass
+
             # Manually assemble transformed matrix to avoid OneHotEncoder transform bug
             # 1) numeric transformer
             try:
@@ -171,8 +182,17 @@ def predict_risk(input_dict):
                     cats = enc.categories_[i]
                     # drop first category per encoder configuration
                     for cat in cats[1:]:
-                        arr = (df_aligned[col].astype(str) == str(cat)).astype(int).to_numpy().reshape(-1, 1)
+                        # compare case-insensitively to be robust to capitalization differences
+                        left = df_aligned[col].astype(str).str.lower()
+                        right = str(cat).lower()
+                        arr = (left == right).astype(int).to_numpy().reshape(-1, 1)
                         cat_arrays.append(arr)
+                # DEBUG: report categorical matrix stats
+                try:
+                    if cat_arrays:
+                        print('cat_arrays count:', len(cat_arrays), 'first col sample:', cat_arrays[0].ravel()[:5])
+                except Exception:
+                    pass
                 if cat_arrays:
                     cat_matrix = np.hstack(cat_arrays)
                 else:
