@@ -15,11 +15,18 @@ def predict():
     try:
         data = request.json
         app.logger.info('Incoming /predict JSON: %s', data)
-
+        # Basic validation: ensure JSON payload and required fields exist
+        if not data or not isinstance(data, dict):
+            return jsonify({'error': 'Request must be JSON with form fields'}), 400
+        required = ['age','gender','glucose','hba1c','systolic','diastolic','bmi','cholesterol','triglycerides','smoking','alcohol','activity','diet_score','family_history','sleep','stress']
+        missing = [k for k in required if k not in data or data.get(k) in (None, '')]
+        if missing:
+            return jsonify({'error': 'Missing required fields', 'missing': missing}), 400
         # Map form data
+        # Pass categorical strings so the preprocessor's OneHotEncoder can match categories
         input_data = {
             'Age': int(data['age']),
-            'Gender': 1 if data['gender'] == 'male' else 0,
+            'Gender': data['gender'],
             'Glucose': float(data['glucose']),
             'HbA1c': float(data['hba1c']),
             'Systolic': int(data['systolic']),
@@ -27,13 +34,13 @@ def predict():
             'BMI': float(data['bmi']),
             'Cholesterol': float(data['cholesterol']),
             'Triglycerides': float(data['triglycerides']),
-            'Smoking': 1 if data['smoking'] == 'yes' else 0,
-            'Alcohol': 1 if data['alcohol'] in ['occasional', 'regular'] else 0,
-            'Physical_Activity': {'low':0, 'moderate':1, 'high':2}[data['activity']],
+            'Smoking': data['smoking'],
+            'Alcohol': data['alcohol'],
+            'Physical_Activity': data['activity'],
             'Diet_Score': int(data['diet_score']),
-            'Family_History': 1 if data['family_history'] == 'yes' else 0,
+            'Family_History': data['family_history'],
             'Sleep_Hours': float(data['sleep']),
-            'Stress_Level': {'low':0, 'moderate':1, 'high':2}[data['stress']],
+            'Stress_Level': data['stress'],
             'TC_HDL_Ratio': 0  # placeholder
         }
 
@@ -54,4 +61,5 @@ def predict():
         return jsonify({'error': str(e), 'traceback': tb}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Disable the auto-reloader/watchdog to avoid intermittent restarts while loading model artifacts
+    app.run(debug=True, use_reloader=False)
