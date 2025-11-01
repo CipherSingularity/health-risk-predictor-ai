@@ -1,6 +1,7 @@
 # src/prediction.py
 import joblib
 import pandas as pd
+import numpy as np
 from pathlib import Path
 from typing import Iterable
 
@@ -88,7 +89,102 @@ def predict_risk(input_dict):
     if '__multi__' in models:
         chronic_model, preprocessor = models['__multi__']
         if preprocessor is not None:
-            X_proc = preprocessor.transform(df)
+            # Align and populate the raw DataFrame to match preprocessor.feature_names_in_
+            expected = list(preprocessor.feature_names_in_)
+
+            def _candidates(name):
+                # generate possible input keys that map to this expected column
+                yield name
+                yield name.replace(' ', '_')
+                yield name.replace(' ', '').lower()
+                yield name.lower().replace(' ', '_')
+
+            df_aligned = pd.DataFrame(index=df.index)
+            for col in expected:
+                found = False
+                for cand in _candidates(col):
+                    if cand in df.columns:
+                        df_aligned[col] = df[cand]
+                        found = True
+                        break
+                if not found:
+                    # handle some common derived/renamed columns
+                    if col == 'Systolic_BP' and 'Systolic' in df.columns:
+                        df_aligned[col] = pd.to_numeric(df['Systolic'], errors='coerce')
+                    elif col == 'Diastolic_BP' and 'Diastolic' in df.columns:
+                        df_aligned[col] = pd.to_numeric(df['Diastolic'], errors='coerce')
+                    elif col == 'BMI_Category' and 'BMI' in df.columns:
+                        df_aligned[col] = pd.cut(pd.to_numeric(df['BMI'], errors='coerce'), bins=[0,18.5,25,30,100], labels=['Underweight','Normal','Overweight','Obese'])
+                    elif col == 'Age_Group' and 'Age' in df.columns:
+                        df_aligned[col] = pd.cut(pd.to_numeric(df['Age'], errors='coerce'), bins=[0,40,60,100], labels=['Young','Middle','Senior'])
+                    else:
+                        # default to NaN
+                        df_aligned[col] = pd.NA
+
+            # Identify categorical columns and their default fill values from the fitted OneHotEncoder
+            cat_cols = []
+            cat_fill = {}
+            try:
+                # transformers_ entries: ('num', transformer, cols), ('cat', transformer, cols)
+                for name, transformer, cols in preprocessor.transformers_:
+                    if name == 'cat':
+                        cat_cols = list(cols)
+                        try:
+                            enc = preprocessor.named_transformers_['cat']
+                            # enc.categories_ is a list parallel to cat_cols
+                            for i, col in enumerate(cat_cols):
+                                cats = enc.categories_[i] if hasattr(enc, 'categories_') else []
+                                cat_fill[col] = cats[0] if len(cats) > 0 else ''
+                        except Exception:
+                            for col in cat_cols:
+                                cat_fill[col] = ''
+                        break
+            except Exception:
+                cat_cols = []
+
+            # Coerce numeric columns to numeric (safe) and fill categorical cols with a default category
+            for c in df_aligned.columns:
+                if c in cat_cols:
+                    # ensure object dtype before filling with string category
+                    df_aligned[c] = df_aligned[c].astype(object).fillna(cat_fill.get(c, ''))
+                else:
+                    df_aligned[c] = pd.to_numeric(df_aligned[c], errors='coerce').fillna(0)
+
+            # Manually assemble transformed matrix to avoid OneHotEncoder transform bug
+            # 1) numeric transformer
+            try:
+                num_cols = list(preprocessor.transformers_[0][2])
+                num_transformer = preprocessor.named_transformers_['num']
+                num_array = num_transformer.transform(df_aligned[num_cols])
+            except Exception:
+                # fallback: numeric values as-is
+                num_cols = [c for c in df_aligned.columns if c not in cat_cols]
+                num_array = df_aligned[num_cols].to_numpy()
+
+            # 2) categorical: build one-hot columns respecting drop='first'
+            cat_matrix = np.zeros((len(df_aligned), 0))
+            try:
+                enc = preprocessor.named_transformers_['cat']
+                cat_cols_local = list(preprocessor.transformers_[1][2])
+                cat_arrays = []
+                for i, col in enumerate(cat_cols_local):
+                    cats = enc.categories_[i]
+                    # drop first category per encoder configuration
+                    for cat in cats[1:]:
+                        arr = (df_aligned[col].astype(str) == str(cat)).astype(int).to_numpy().reshape(-1, 1)
+                        cat_arrays.append(arr)
+                if cat_arrays:
+                    cat_matrix = np.hstack(cat_arrays)
+                else:
+                    cat_matrix = np.zeros((len(df_aligned), 0))
+            except Exception:
+                cat_matrix = np.zeros((len(df_aligned), 0))
+
+            # 3) concatenate numeric + categorical arrays to form X_proc
+            if num_array.size == 0 and cat_matrix.size == 0:
+                X_proc = df_aligned.to_numpy()
+            else:
+                X_proc = np.hstack([num_array, cat_matrix])
         elif scaler is not None:
             # if scaler was somehow set, use it
             X_proc = scaler.transform(df)
