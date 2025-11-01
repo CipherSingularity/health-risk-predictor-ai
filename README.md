@@ -485,9 +485,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👥 Authors
 
 **Your Name**
-- GitHub: [@yourusername](https://github.com/ARUNAGIRINATHAN-K)
-- LinkedIn: [Your Profile](https://linkedin.com/in/arunagirinathan-k)
-https://github.com/ARUNAGIRINATHAN-K/health-risk-predictor-ai/edit/main/README.md
+- GitHub: [ARUNAGIRINATHAN-K](https://github.com/ARUNAGIRINATHAN-K)
+- LinkedIn: [arunagirinathan-k](https://linkedin.com/in/arunagirinathan-k)
 ---
 
 ## 🙏 Acknowledgments
