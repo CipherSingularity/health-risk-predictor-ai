@@ -13,3 +13,14 @@ button:hover { background: #2980b9; }
 .diabetes { background: #e74c3c; }
 .heart { background: #e67e22; }
 .stroke { background: #9b59b6; }
+
+/* Result card */
+.result-card { background: white; border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,0.08); padding: 18px; }
+.result-header { display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; }
+.result-header h2 { margin: 0; font-size: 20px; color: #2c3e50; }
+.result-body { margin-bottom: 12px; }
+.result-footer h3 { margin: 10px 0 8px 0; font-size: 16px; }
+.risk-row { display:flex; align-items:center; justify-content:space-between; gap: 12px; margin-bottom:8px; }
+.risk-label { width: 30%; font-weight:600; color:#34495e; }
+.risk-value { width: 15%; text-align:right; font-weight:700; }
+.recs-list { margin-left: 16px; }
