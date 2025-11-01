@@ -1,5 +1,12 @@
 import sys
-sys.path.append('./src')
+import os
+from pathlib import Path
+
+# Ensure repo root/src is on sys.path regardless of current working directory
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SRC_PATH = REPO_ROOT / 'src'
+sys.path.insert(0, str(SRC_PATH))
+
 from prediction import predict_risk
 
 def test_prediction():
