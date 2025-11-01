@@ -257,23 +257,46 @@ health-risk-prediction/
 
 ## 🎨 Screenshots
 
+<div align="center">
+  
 ### Landing Page
-![Landing Page](screenshots/landing.png)
+
+<p align="center">
+  <img src="https://github.com/ARUNAGIRINATHAN-K/health-risk-predictor-ai/blob/main/img/img-1.png" 
+       alt="Project Demo" 
+       width="600" 
+       height="340" 
+       style="border-radius: 15px;">
+</p>
+
 *User-friendly interface for inputting health metrics*
 
-### Risk Assessment Dashboard
-![Dashboard](screenshots/dashboard.png)
-*Comprehensive visualization of health risks and scores*
+### Risk Assessment Input
+
+<p align="center">
+  <img src="https://github.com/ARUNAGIRINATHAN-K/health-risk-predictor-ai/blob/main/img/img-3.png" 
+       alt="Project Demo" 
+       width="600" 
+       height="340" 
+       style="border-radius: 15px;">
+</p>
+
+*Comprehensive visualization for prediction*
 
 ### Personalized Recommendations
-![Recommendations](screenshots/recommendations.png)
+
+<p align="center">
+  <img src="https://github.com/ARUNAGIRINATHAN-K/health-risk-predictor-ai/blob/main/img/final.png" 
+       alt="Project Demo" 
+       width="600" 
+       height="840" 
+       style="border-radius: 15px;">
+</p>
+
 *AI-generated actionable health advice*
 
-### Explainable AI View
-![SHAP Analysis](screenshots/shap.png)
-*Feature importance breakdown using SHAP values*
+</div>
 
----
 
 ## 🔧 API Endpoints
 
@@ -283,16 +306,68 @@ Predict health risks based on user input.
 **Request Body:**
 ```json
 {
-  "age": 45,
-  "gender": "male",
-  "bmi": 28.5,
-  "smoking": "former",
-  "alcohol": "moderate",
-  "physical_activity": "low",
-  "blood_pressure": "high",
-  "cholesterol": "normal",
-  "diabetes_history": false,
-  "family_history": true
+"age": "55",
+"gender": "male",
+"glucose": "135",
+"hba1c": "6.3",
+"systolic": "145",
+"diastolic": "92",
+"bmi": "32",
+"cholesterol": "245",
+"triglycerides": "180",
+"smoking": "yes",
+"alcohol": "no",
+"activity": "low",
+"diet_score": "45",
+"family_history": "yes",
+"sleep": "5",
+"stress": "high"
+}
+
+```
+Expected: non-zero risks (in my tests this returned ~100% and 3 recommendations).
+
+**Medium-risk sample (may give mid-range probabilities — possibly below recommendation threshold)**
+```json
+{
+"age": "50",
+"gender": "male",
+"glucose": "110",
+"hba1c": "6.0",
+"systolic": "130",
+"diastolic": "85",
+"bmi": "28",
+"cholesterol": "210",
+"triglycerides": "150",
+"smoking": "no",
+"alcohol": "occasional",
+"activity": "moderate",
+"diet_score": "60",
+"family_history": "yes",
+"sleep": "6",
+"stress": "moderate"
+}
+```
+
+**Low-risk sample (should produce low probabilities → no recommendations)**
+```json
+{
+"age": "30",
+"gender": "female",
+"glucose": "90",
+"hba1c": "5.4",
+"systolic": "115",
+"diastolic": "75",
+"bmi": "22",
+"cholesterol": "170",
+"triglycerides": "100",
+"smoking": "no",
+"alcohol": "occasional",
+"activity": "moderate",
+"diet_score": "80",
+"family_history": "no",
+"sleep": "7",
+"stress": "low"
 }
 ```
 
@@ -412,10 +487,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👥 Authors
 
 **Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- LinkedIn: [Your Profile](https://linkedin.com/in/yourprofile)
-- Email: your.email@example.com
-
+- GitHub: [@yourusername](https://github.com/ARUNAGIRINATHAN-K)
+- LinkedIn: [Your Profile](https://linkedin.com/in/arunagirinathan-k)
+https://github.com/ARUNAGIRINATHAN-K/health-risk-predictor-ai/edit/main/README.md
 ---
 
 ## 🙏 Acknowledgments
